@@ -4,6 +4,7 @@ defmodule DistilleryConsulTest do
 
   @fixtures_path Path.join([__DIR__, "fixtures"])
   @app_path Path.join([@fixtures_path, "app"])
+  @app_bin Path.join([@app_path, "_build", "prod", "rel", "app", "bin", "app"])
   @sys_config Path.join([@app_path, "_build", "prod", "rel", "app", "var", "sys.config"])
 
   @url "https:/example.com:8081/service"
@@ -28,6 +29,10 @@ defmodule DistilleryConsulTest do
       assert {:ok, _} = mix("deps.get")
       assert {:ok, _} = mix("release")
 
+      do_exec(@app_bin, ["run"])
+      :timer.sleep(5)
+      do_exec(@app_bin, ["stop"])
+
       {:ok, [config]} = :file.consult(@sys_config)
       assert @url == config[:app][:url]
       assert @level == config[:app][:level]
@@ -37,11 +42,11 @@ defmodule DistilleryConsulTest do
   end
 
 
-  def mix(command, args \\ []) do
+  defp mix(command, args \\ []) do
     do_exec("mix", [command | args], env: [{"MIX_ENV", "prod"}])
   end
 
-  defp do_exec(command, args, opts) do
+  defp do_exec(command, args, opts \\ []) do
     opts = Keyword.merge([stderr_to_stdout: true], opts)
     case System.cmd(command, args, opts) do
       {output, 0} when is_binary(output) ->
