@@ -1,6 +1,6 @@
 defmodule DistilleryConsul.Client do
   @moduledoc """
-  Simple implementation of get, put and delete Consul KV methiods.
+  Simple implementation of get, put and delete Consul KV methods.
   It uses httpc in order to avoid adding additional dependencies to release.
   """
 
