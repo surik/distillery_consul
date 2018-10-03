@@ -13,14 +13,15 @@ defmodule DistilleryConsul.MixProject do
 
   def application do
     [
-      extra_applications: []
+      extra_applications: [:inets]
     ]
   end
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:consul, "~> 1.1"}
+      {:poison, "~> 2.2 or ~> 3.0", optional: true},
+      {:jason,  "~> 1.1",           optional: true}
     ]
   end
 end

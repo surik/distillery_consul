@@ -2,6 +2,8 @@ defmodule DistilleryConsulTest do
   use ExUnit.Case
   doctest DistilleryConsul
 
+  alias DistilleryConsul.Client, as: Consul
+
   @fixtures_path Path.join([__DIR__, "fixtures"])
   @app_path Path.join([@fixtures_path, "app"])
   @app_bin Path.join([@app_path, "_build", "prod", "rel", "app", "bin", "app"])
@@ -10,11 +12,12 @@ defmodule DistilleryConsulTest do
   @url "https:/example.com:8081/service"
   @level "info"
 
+
   setup_all do
-    Consul.Kv.put!("app/url", @url)
-    Consul.Kv.put!("app/level", @level)
+    Consul.put!("app/url", @url)
+    Consul.put!("app/level", @level)
     on_exit fn -> 
-      Consul.Kv.delete("app")
+      Consul.delete!("app")
     end
   end
 

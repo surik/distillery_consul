@@ -25,6 +25,6 @@ release :app do
     :runtime_tools
   ]
   set config_providers: [
-    {DistilleryConsul.Provider, []}
+    {DistilleryConsul.Provider, [host: "http://localhost", port: 8500, token: nil]}
   ]
 end

@@ -1,18 +1,19 @@
 defmodule DistilleryConsul.Provider do
   alias Mix.Releases.Config.Provider
 
-  def init(_) do
-    # Start Mix if not started to allow calling Mix APIs
-    started? = List.keymember?(Application.started_applications(), :mix, 0)
-
+  def init(opts) do
     {:ok, deps} = Application.ensure_all_started(:distillery_consul)
 
-     unless started? do
+    started? = List.keymember?(Application.started_applications(), :mix, 0)
+    deps = unless started? do
       :ok = Application.start(:mix)
       # Always set MIX_ENV to :prod, unless otherwise given
       env = System.get_env("MIX_ENV") || "prod"
       System.put_env("MIX_ENV", env)
       Mix.env(String.to_atom(env))
+      [:mix | deps]
+    else
+      deps
     end
 
     try do
@@ -20,7 +21,7 @@ defmodule DistilleryConsul.Provider do
       with {:ok, path} <- Provider.expand_path(path) do
         path
         |> eval!()
-        |> merge_config()
+        |> merge_config(opts)
         |> Mix.Config.persist()
       else
         {:error, reason} ->
@@ -30,11 +31,6 @@ defmodule DistilleryConsul.Provider do
       _ ->
         :ok
     after
-      unless started? do
-        # Do not leave Mix started if it was started here
-        # The boot script needs to be able to start it
-        :ok = Application.stop(:mix)
-      end
       for dep <- deps, do: Application.stop(dep)
     end
   end
@@ -44,22 +40,21 @@ defmodule DistilleryConsul.Provider do
     config
   end
 
-  defp merge_config(runtime_config) do
+  defp merge_config(runtime_config, opts) do
     Enum.flat_map(runtime_config, fn {app, app_config} ->
-      app_config = fetch_from_consul(app_config)
+      app_config = fetch_from_consul(app_config, opts)
       all_env = Application.get_all_env(app)
       Mix.Config.merge([{app, all_env}], [{app, app_config}])
     end)
   end
 
-  defp fetch_from_consul(app_config, acc \\ [])
+  defp fetch_from_consul(app_config, opts, acc \\ [])
 
-  defp fetch_from_consul([], acc), do: acc
-  defp fetch_from_consul([{key, {:consul, value}} | tail], acc) do
-    value = hd(Consul.Kv.fetch!(value).body)["Value"]
-    fetch_from_consul(tail, [{key, value} | acc])
+  defp fetch_from_consul([], _opts, acc), do: acc
+  defp fetch_from_consul([{key, {:consul, value}} | tail], opts, acc) do
+    value = DistilleryConsul.Client.get!(value, opts)
+    fetch_from_consul(tail, opts, [{key, value} | acc])
   end
-  defp fetch_from_consul([head | tail], acc), do:
-    fetch_from_consul(tail, [head | acc])
-
+  defp fetch_from_consul([head | tail], opts, acc), do:
+    fetch_from_consul(tail, opts, [head | acc])
 end

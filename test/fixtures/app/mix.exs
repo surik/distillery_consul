@@ -19,6 +19,7 @@ defmodule App.MixProject do
 
   defp deps do
     [
+      {:jason,             "~> 1.1"},
       {:distillery,        "~> 2.0", runtime: false},
       {:distillery_consul, path: "../../../."}
     ]
