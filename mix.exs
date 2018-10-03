@@ -7,7 +7,9 @@ defmodule DistilleryConsul.MixProject do
       version: "0.1.0",
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      description: description(),
+      package: package(),
     ]
   end
 
@@ -23,5 +25,15 @@ defmodule DistilleryConsul.MixProject do
       {:poison, "~> 2.2 or ~> 3.0", optional: true},
       {:jason,  "~> 1.1",           optional: true}
     ]
+  end
+
+  defp description do
+    "Distillery config provider for Consul KV"
+  end
+
+  defp package do
+    [maintainers: ["Yury Gargay"],
+     licenses: ["MIT"],
+     links: %{"Github" => "https://github.com/surik/distillery_consul"}]
   end
 end
