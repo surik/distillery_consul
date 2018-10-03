@@ -1,0 +1,22 @@
+sudo: false
+language: elixir
+elixir:
+  - 1.6.6
+  - 1.7.3
+otp_release:
+  - 20.3
+  - 21.1
+env:
+  global:
+    - CONSUL_VERSION=1.2.3
+    - CONSUL_DC=dev1
+    - CONSUL_DIR=$HOME/consul_$CONSUL_VERSION
+before_script:
+  - 'if [[ ! -f $CONSUL_DIR/consul ]]; then (mkdir -p $CONSUL_DIR && cd $CONSUL_DIR && wget https://releases.hashicorp.com/consul/${CONSUL_VERSION}/consul_${CONSUL_VERSION}_linux_amd64.zip && unzip consul_${CONSUL_VERSION}_linux_amd64.zip); fi'
+  - $CONSUL_DIR/consul --version
+  - $CONSUL_DIR/consul agent -server -bootstrap-expect 1 -data-dir /tmp/consul -dc=$CONSUL_DC &
+  # Wait for consul to elect itself as leader
+  - sleep 5
+cache:
+  directories:
+    - $CONSUL_DIR
