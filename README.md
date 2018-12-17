@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/surik/distillery_consul.svg?branch=master)](https://travis-ci.org/surik/distillery_consul)
 
-Distillery config provider for Consul KV.
+Distillery config provider for Consul KV with minium dependencies.
 
 Links:
 * [Custom Configuration Providers](https://hexdocs.pm/distillery/extensibility/config_providers.html)
