@@ -10,12 +10,13 @@ defmodule DistilleryConsulTest do
   @sys_config Path.join([@app_path, "_build", "prod", "rel", "app", "var", "sys.config"])
 
   @url "https:/example.com:8081/service"
-  @level "info"
-
+  @level :info
+  @rate_limit 100
 
   setup_all do
     Consul.put!("app/url", @url)
-    Consul.put!("app/level", @level)
+    Consul.put!("app/level", "#{@level}")
+    Consul.put!("app/rate_limit", "#{@rate_limit}")
     on_exit fn -> 
       Consul.delete!("app")
     end
@@ -39,6 +40,7 @@ defmodule DistilleryConsulTest do
       {:ok, [config]} = :file.consult(@sys_config)
       assert @url == config[:app][:url]
       assert @level == config[:app][:level]
+      assert @rate_limit == config[:app][:rate_limit]
     after
       File.cd!(old_dir)
     end

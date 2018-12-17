@@ -44,9 +44,9 @@ The following configuration:
 
 ```elixir
 config :app, 
-  rate_limit: 100,
-  url: {:consul, "app/url"},
-  level: {:consul, "app/level"}
+  rate_limit: {:consul, :integer, "app/rate_limit"},
+  url: {:consul, :string, "app/url"},
+  level: {:consul, :atom, "app/level"}
 ```
 
 They will be changed based on values in Consul KV during release startup:
@@ -55,5 +55,5 @@ They will be changed based on values in Consul KV during release startup:
 $ _build/dev/rel/app/bin/app console
 ...
 iex(app@127.0.0.1)1> Application.get_all_env(:app)
-[rate_limit: 100, url: "https:/example.com:8081/service", level: "info"]
+[rate_limit: 100, url: "https:/example.com:8081/service", level: :info]
 ```

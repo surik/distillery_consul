@@ -48,13 +48,27 @@ defmodule DistilleryConsul.Provider do
     end)
   end
 
+  defguard is_type(type) when type in [:integer, :float, :string, :atom]
+
   defp fetch_from_consul(app_config, opts, acc \\ [])
 
   defp fetch_from_consul([], _opts, acc), do: acc
+  defp fetch_from_consul([{key, {:consul, type, value}} | tail], opts, acc) 
+   when is_type(type) do
+    value = DistilleryConsul.Client.get!(value, opts)
+            |> convert_type(type)
+    fetch_from_consul(tail, opts, [{key, value} | acc])
+  end
   defp fetch_from_consul([{key, {:consul, value}} | tail], opts, acc) do
     value = DistilleryConsul.Client.get!(value, opts)
     fetch_from_consul(tail, opts, [{key, value} | acc])
   end
   defp fetch_from_consul([head | tail], opts, acc), do:
     fetch_from_consul(tail, opts, [head | acc])
+
+
+  defp convert_type(value, :string), do: value
+  defp convert_type(value, :integer), do: String.to_integer(value)
+  defp convert_type(value, :float), do: String.to_float(value)
+  defp convert_type(value, :atom), do: String.to_atom(value)
 end
